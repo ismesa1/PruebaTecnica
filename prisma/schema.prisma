@@ -1,15 +1,43 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Municipio {
+  id         Int        @id @default(autoincrement())
+  nombre     String     @unique
+  estaciones Estacion[]
+
+  @@map("municipios")
+}
+
+model Estacion {
+  id          Int        @id @default(autoincrement())
+  nombre      String
+  latitud     Float
+  longitud    Float
+  municipioId Int        @map("municipio_id")
+  municipio   Municipio  @relation(fields: [municipioId], references: [id])
+  mediciones  Medicion[]
+
+  @@map("estaciones")
+}
+
+model Medicion {
+  id            Int      @id @default(autoincrement())
+  estacionId    Int      @map("estacion_id")
+  estacion      Estacion @relation(fields: [estacionId], references: [id])
+  fecha         DateTime
+  temperatura   Float
+  humedad       Float
+  pm25          Float
+  precipitacion Float
+  ph            Float
+
+  @@index([estacionId, fecha])
+  @@map("mediciones")
 }

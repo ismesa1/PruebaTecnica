@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: sat
+      POSTGRES_PASSWORD: sat
+      POSTGRES_DB: monitoreo
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sat -d monitoreo"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://sat:sat@db:5432/monitoreo?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
